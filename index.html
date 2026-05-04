@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MediGuide – Healthcare Recommendation System</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --teal-dark: #0F6E56;
+    --teal-mid: #1D9E75;
+    --teal-light: #5DCAA5;
+    --teal-pale: #E1F5EE;
+    --blue-dark: #185FA5;
+    --blue-mid: #378ADD;
+    --blue-pale: #E6F1FB;
+    --coral: #D85A30;
+    --coral-pale: #FAECE7;
+    --amber: #BA7517;
+    --amber-pale: #FAEEDA;
+    --gray-dark: #2C2C2A;
+    --gray-mid: #5F5E5A;
+    --gray-light: #B4B2A9;
+    --gray-pale: #F1EFE8;
+    --white: #FFFFFF;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--gray-dark);
+    background: var(--white);
+    line-height: 1.6;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid #e8e6e0;
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 68px;
+  }
+  .nav-logo {
+    font-family: var(--font-display);
+    font-size: 1.5rem; font-weight: 700;
+    color: var(--teal-dark);
+    display: flex; align-items: center; gap: 8px;
+    text-decoration: none;
+  }
+  .nav-logo span {
+    display: inline-block; width: 32px; height: 32px;
+    background: var(--teal-mid); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-logo span svg { width: 18px; height: 18px; fill: white; }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    font-size: 0.9rem; font-weight: 500; color: var(--gray-mid);
+    text-decoration: none; transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--teal-dark); }
+  .nav-cta {
+    background: var(--teal-dark); color: white;
+    padding: 0.5rem 1.25rem; border-radius: 50px;
+    font-size: 0.88rem; font-weight: 600;
+    text-decoration: none; transition: background 0.2s;
+  }
+  .nav-cta:hover { background: var(--teal-mid); }
+
+  /* HERO */
+  .hero {
+    min-height: 90vh;
+    background: linear-gradient(135deg, #04342C 0%, #0F6E56 50%, #1D9E75 100%);
+    display: flex; align-items: center;
+    position: relative; overflow: hidden;
+    padding: 4rem 2rem;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle at 70% 30%, rgba(93,202,165,0.18) 0%, transparent 60%),
+                      radial-gradient(circle at 20% 80%, rgba(55,138,221,0.12) 0%, transparent 50%);
+  }
+  .hero-content {
+    max-width: 1100px; margin: 0 auto; position: relative; z-index: 1;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(93,202,165,0.2); border: 1px solid rgba(93,202,165,0.4);
+    color: #9FE1CB; padding: 0.35rem 1rem; border-radius: 50px;
+    font-size: 0.82rem; font-weight: 500; letter-spacing: 0.05em;
+    text-transform: uppercase; margin-bottom: 1.25rem;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 4vw, 3.5rem);
+    font-weight: 700; color: white; line-height: 1.15;
+    margin-bottom: 1.25rem;
+  }
+  .hero h1 em { color: #5DCAA5; font-style: normal; }
+  .hero p {
+    color: rgba(255,255,255,0.75); font-size: 1.05rem;
+    line-height: 1.75; margin-bottom: 2rem; font-weight: 300;
+  }
+  .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .btn-primary {
+    background: #5DCAA5; color: #04342C;
+    padding: 0.85rem 2rem; border-radius: 50px;
+    font-weight: 700; font-size: 0.95rem;
+    text-decoration: none; transition: all 0.2s;
+    display: inline-block;
+  }
+  .btn-primary:hover { background: #9FE1CB; transform: translateY(-2px); }
+  .btn-outline {
+    border: 1px solid rgba(255,255,255,0.4); color: white;
+    padding: 0.85rem 2rem; border-radius: 50px;
+    font-weight: 500; font-size: 0.95rem;
+    text-decoration: none; transition: all 0.2s;
+    display: inline-block;
+  }
+  .btn-outline:hover { border-color: white; background: rgba(255,255,255,0.08); }
+
+  /* HERO CARD */
+  .hero-card {
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px; padding: 2rem;
+  }
+  .hero-card-title {
+    font-size: 0.8rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.08em; color: #9FE1CB; margin-bottom: 1.25rem;
+  }
+  .symptom-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+  .symptom-item {
+    display: flex; align-items: center; gap: 0.75rem;
+    background: rgba(255,255,255,0.08); border-radius: 10px;
+    padding: 0.75rem 1rem; cursor: pointer; transition: background 0.2s;
+  }
+  .symptom-item:hover { background: rgba(255,255,255,0.14); }
+  .symptom-icon {
+    width: 34px; height: 34px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
+  }
+  .symptom-item span { font-size: 0.9rem; color: rgba(255,255,255,0.85); font-weight: 400; }
+  .symptom-item .tag {
+    margin-left: auto; font-size: 0.72rem; padding: 0.2rem 0.6rem;
+    border-radius: 50px; font-weight: 600;
+  }
+  .tag-high { background: rgba(216,90,48,0.25); color: #F0997B; }
+  .tag-med  { background: rgba(186,117,23,0.25); color: #FAC775; }
+  .tag-low  { background: rgba(29,158,117,0.25); color: #5DCAA5; }
+  .hero-reco {
+    margin-top: 1.25rem;
+    background: rgba(93,202,165,0.15); border: 1px solid rgba(93,202,165,0.3);
+    border-radius: 12px; padding: 1rem;
+  }
+  .hero-reco-label { font-size: 0.75rem; color: #9FE1CB; font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .hero-reco-text { font-size: 0.88rem; color: rgba(255,255,255,0.85); line-height: 1.5; }
+
+  /* STATS */
+  .stats {
+    background: var(--gray-pale);
+    padding: 3rem 2rem;
+    border-bottom: 1px solid #e8e6e0;
+  }
+  .stats-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: var(--font-display);
+    font-size: 2.5rem; font-weight: 700;
+    color: var(--teal-dark); line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  .stat-label { font-size: 0.88rem; color: var(--gray-mid); font-weight: 400; }
+
+  /* SECTION BASE */
+  section { padding: 5rem 2rem; }
+  .section-inner { max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    font-size: 0.8rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--teal-mid);
+    margin-bottom: 0.75rem; display: block;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    font-weight: 700; color: var(--gray-dark); line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+  .section-sub {
+    color: var(--gray-mid); font-size: 1.05rem; line-height: 1.7;
+    max-width: 600px; font-weight: 300;
+  }
+
+  /* FEATURES */
+  .features-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem; margin-top: 3.5rem;
+  }
+  .feature-card {
+    border: 1px solid #e8e6e0; border-radius: 16px;
+    padding: 2rem 1.75rem; transition: all 0.25s;
+    background: white;
+  }
+  .feature-card:hover {
+    border-color: var(--teal-light);
+    box-shadow: 0 8px 32px rgba(29,158,117,0.1);
+    transform: translateY(-3px);
+  }
+  .feature-icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1.25rem; font-size: 1.4rem;
+  }
+  .icon-teal { background: var(--teal-pale); }
+  .icon-blue { background: var(--blue-pale); }
+  .icon-coral { background: var(--coral-pale); }
+  .icon-amber { background: var(--amber-pale); }
+  .feature-card h3 {
+    font-size: 1.1rem; font-weight: 600; margin-bottom: 0.6rem;
+    color: var(--gray-dark);
+  }
+  .feature-card p { font-size: 0.9rem; color: var(--gray-mid); line-height: 1.65; }
+
+  /* HOW IT WORKS */
+  #how-it-works { background: linear-gradient(180deg, #f8f7f3 0%, #fff 100%); }
+  .steps {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 2rem; margin-top: 3.5rem; position: relative;
+  }
+  .steps::before {
+    content: '';
+    position: absolute; top: 32px; left: calc(12.5% + 0px); right: calc(12.5%);
+    height: 2px; background: repeating-linear-gradient(90deg, var(--teal-light) 0, var(--teal-light) 8px, transparent 8px, transparent 16px);
+    z-index: 0;
+  }
+  .step { text-align: center; position: relative; z-index: 1; }
+  .step-num {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: var(--teal-dark); color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-size: 1.4rem; font-weight: 700;
+    margin: 0 auto 1.25rem;
+    box-shadow: 0 4px 16px rgba(15,110,86,0.3);
+  }
+  .step h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--gray-dark); }
+  .step p { font-size: 0.86rem; color: var(--gray-mid); line-height: 1.6; }
+
+  /* RECOMMENDATION TYPES */
+  .reco-types {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem; margin-top: 3.5rem;
+  }
+  .reco-card {
+    border-radius: 20px; padding: 2.5rem 2rem;
+    position: relative; overflow: hidden;
+  }
+  .reco-teal { background: linear-gradient(135deg, var(--teal-dark), var(--teal-mid)); color: white; }
+  .reco-blue { background: linear-gradient(135deg, var(--blue-dark), var(--blue-mid)); color: white; }
+  .reco-coral { background: linear-gradient(135deg, #993C1D, var(--coral)); color: white; }
+  .reco-card::after {
+    content: '';
+    position: absolute; bottom: -20px; right: -20px;
+    width: 120px; height: 120px; border-radius: 50%;
+    background: rgba(255,255,255,0.07);
+  }
+  .reco-card-icon { font-size: 2rem; margin-bottom: 1rem; }
+  .reco-card h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.6rem; }
+  .reco-card p { font-size: 0.88rem; opacity: 0.82; line-height: 1.65; margin-bottom: 1.5rem; }
+  .reco-list { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+  .reco-list li {
+    font-size: 0.84rem; opacity: 0.88;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .reco-list li::before {
+    content: ''; display: inline-block;
+    width: 5px; height: 5px; border-radius: 50%;
+    background: rgba(255,255,255,0.7); flex-shrink: 0;
+  }
+
+  /* DOCTORS */
+  #doctors { background: var(--gray-pale); }
+  .doctors-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem; margin-top: 3rem;
+  }
+  .doctor-card {
+    background: white; border-radius: 16px;
+    padding: 1.5rem; text-align: center;
+    border: 1px solid #e8e6e0; transition: all 0.2s;
+  }
+  .doctor-card:hover {
+    border-color: var(--teal-light);
+    box-shadow: 0 6px 24px rgba(29,158,117,0.1);
+    transform: translateY(-2px);
+  }
+  .doctor-avatar {
+    width: 72px; height: 72px; border-radius: 50%;
+    margin: 0 auto 1rem;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; font-weight: 700;
+    font-family: var(--font-display);
+  }
+  .av-teal { background: var(--teal-pale); color: var(--teal-dark); }
+  .av-blue { background: var(--blue-pale); color: var(--blue-dark); }
+  .av-coral { background: var(--coral-pale); color: #993C1D; }
+  .av-amber { background: var(--amber-pale); color: #633806; }
+  .doctor-card h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.25rem; }
+  .doctor-specialty { font-size: 0.8rem; color: var(--teal-mid); font-weight: 500; margin-bottom: 0.5rem; }
+  .doctor-meta { font-size: 0.8rem; color: var(--gray-mid); }
+  .doctor-rating {
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+    margin-top: 0.75rem;
+  }
+  .stars { color: #EF9F27; font-size: 0.85rem; letter-spacing: 1px; }
+  .rating-num { font-size: 0.8rem; color: var(--gray-mid); }
+  .doc-btn {
+    display: block; margin-top: 1rem;
+    background: var(--teal-pale); color: var(--teal-dark);
+    border-radius: 50px; padding: 0.45rem 1rem;
+    font-size: 0.82rem; font-weight: 600;
+    text-decoration: none; transition: background 0.2s;
+  }
+  .doc-btn:hover { background: #9FE1CB; }
+
+  /* SYMPTOM CHECKER */
+  #symptom-checker { background: white; }
+  .checker-layout {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 4rem; align-items: center; margin-top: 3rem;
+  }
+  .checker-form { background: #f8f7f3; border-radius: 20px; padding: 2.5rem; }
+  .checker-form h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 1.5rem; color: var(--gray-dark); }
+  .form-group { margin-bottom: 1.25rem; }
+  .form-group label { display: block; font-size: 0.84rem; font-weight: 500; color: var(--gray-mid); margin-bottom: 0.5rem; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 0.75rem 1rem;
+    border: 1px solid #e8e6e0; border-radius: 10px;
+    font-family: var(--font-body); font-size: 0.9rem;
+    color: var(--gray-dark); background: white;
+    transition: border-color 0.2s;
+    appearance: none;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none; border-color: var(--teal-mid);
+    box-shadow: 0 0 0 3px rgba(29,158,117,0.1);
+  }
+  .form-group textarea { resize: vertical; min-height: 90px; }
+  .symptom-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+  .sym-tag {
+    padding: 0.3rem 0.8rem; border-radius: 50px;
+    background: var(--teal-pale); color: var(--teal-dark);
+    font-size: 0.8rem; font-weight: 500; cursor: pointer;
+    border: 1px solid transparent; transition: all 0.15s;
+  }
+  .sym-tag:hover { background: #9FE1CB; }
+  .sym-tag.active { background: var(--teal-dark); color: white; }
+  .submit-btn {
+    width: 100%; background: var(--teal-dark); color: white;
+    border: none; border-radius: 10px; padding: 0.9rem;
+    font-family: var(--font-body); font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; transition: background 0.2s; margin-top: 0.5rem;
+  }
+  .submit-btn:hover { background: var(--teal-mid); }
+  .result-panel { display: none; margin-top: 1.5rem; }
+  .result-panel.show { display: block; }
+  .result-card {
+    background: white; border-radius: 12px; padding: 1.25rem;
+    border-left: 4px solid var(--teal-mid); margin-bottom: 0.75rem;
+  }
+  .result-card h4 { font-size: 0.95rem; font-weight: 600; color: var(--gray-dark); margin-bottom: 0.25rem; }
+  .result-card p { font-size: 0.84rem; color: var(--gray-mid); }
+  .urgency-badge {
+    display: inline-block; padding: 0.2rem 0.7rem;
+    border-radius: 50px; font-size: 0.75rem; font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  .urg-normal { background: var(--teal-pale); color: var(--teal-dark); }
+  .urg-moderate { background: var(--amber-pale); color: var(--amber); }
+  .urg-urgent { background: var(--coral-pale); color: var(--coral); }
+
+  /* INFO PANELS beside checker */
+  .checker-info h3 {
+    font-family: var(--font-display);
+    font-size: 1.6rem; font-weight: 700; color: var(--gray-dark); margin-bottom: 1rem;
+  }
+  .checker-info p { font-size: 0.95rem; color: var(--gray-mid); line-height: 1.7; margin-bottom: 1.5rem; }
+  .info-pills { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+  .info-pill {
+    display: flex; align-items: center; gap: 0.6rem;
+    background: white; border: 1px solid #e8e6e0;
+    border-radius: 50px; padding: 0.5rem 1rem;
+    font-size: 0.84rem; font-weight: 500; color: var(--gray-dark);
+  }
+  .info-pill-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-teal { background: var(--teal-mid); }
+  .dot-blue { background: var(--blue-mid); }
+  .dot-amber { background: var(--amber); }
+
+  /* TESTIMONIALS */
+  #testimonials { background: linear-gradient(135deg, #04342C 0%, #0F6E56 100%); }
+  #testimonials .section-title { color: white; }
+  #testimonials .section-label { color: #9FE1CB; }
+  #testimonials .section-sub { color: rgba(255,255,255,0.65); }
+  .testimonials-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem; margin-top: 3rem;
+  }
+  .testimonial-card {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px; padding: 2rem;
+    transition: background 0.2s;
+  }
+  .testimonial-card:hover { background: rgba(255,255,255,0.11); }
+  .testimonial-stars { color: #EF9F27; font-size: 0.9rem; letter-spacing: 2px; margin-bottom: 1rem; }
+  .testimonial-text {
+    font-size: 0.92rem; color: rgba(255,255,255,0.82);
+    line-height: 1.7; margin-bottom: 1.5rem; font-weight: 300;
+    font-style: italic;
+  }
+  .testimonial-author { display: flex; align-items: center; gap: 0.75rem; }
+  .author-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.9rem; flex-shrink: 0;
+  }
+  .author-name { font-size: 0.88rem; font-weight: 600; color: white; }
+  .author-role { font-size: 0.78rem; color: rgba(255,255,255,0.55); }
+
+  /* CTA SECTION */
+  #cta { background: var(--gray-pale); text-align: center; }
+  #cta .section-title { margin-bottom: 1rem; }
+  #cta .section-sub { margin: 0 auto 2.5rem; }
+  .cta-actions { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+  .btn-teal {
+    background: var(--teal-dark); color: white;
+    padding: 0.9rem 2.25rem; border-radius: 50px;
+    font-weight: 700; font-size: 0.95rem;
+    text-decoration: none; transition: all 0.2s; display: inline-block;
+  }
+  .btn-teal:hover { background: var(--teal-mid); transform: translateY(-2px); }
+  .btn-ghost {
+    border: 2px solid var(--teal-dark); color: var(--teal-dark);
+    padding: 0.88rem 2.25rem; border-radius: 50px;
+    font-weight: 600; font-size: 0.95rem;
+    text-decoration: none; transition: all 0.2s; display: inline-block;
+  }
+  .btn-ghost:hover { background: var(--teal-pale); }
+
+  /* FOOTER */
+  footer {
+    background: var(--gray-dark); color: rgba(255,255,255,0.65);
+    padding: 3rem 2rem 2rem;
+  }
+  .footer-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 3rem; margin-bottom: 2.5rem;
+  }
+  .footer-brand .nav-logo { color: white; margin-bottom: 1rem; }
+  .footer-brand p { font-size: 0.86rem; line-height: 1.7; }
+  .footer-col h5 {
+    color: white; font-size: 0.88rem; font-weight: 600;
+    margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+  .footer-col a { font-size: 0.85rem; color: rgba(255,255,255,0.55); text-decoration: none; transition: color 0.2s; }
+  .footer-col a:hover { color: var(--teal-light); }
+  .footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 1.5rem;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.82rem;
+  }
+  .disclaimer {
+    background: rgba(216,90,48,0.15); border: 1px solid rgba(216,90,48,0.3);
+    border-radius: 8px; padding: 0.6rem 1rem;
+    font-size: 0.78rem; color: #F0997B; max-width: 600px;
+    margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 900px) {
+    .hero-content, .checker-layout { grid-template-columns: 1fr; }
+    .features-grid, .reco-types, .testimonials-grid { grid-template-columns: 1fr; }
+    .steps { grid-template-columns: 1fr 1fr; }
+    .steps::before { display: none; }
+    .doctors-grid { grid-template-columns: repeat(2, 1fr); }
+    .stats-inner { grid-template-columns: repeat(2, 1fr); }
+    .footer-inner { grid-template-columns: 1fr 1fr; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">
+    <span>
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15v-4H7l5-8v4h4l-5 8z"/>
+      </svg>
+    </span>
+    MediGuide
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how-it-works">How it Works</a></li>
+    <li><a href="#doctors">Find Doctors</a></li>
+    <li><a href="#symptom-checker">Symptom Checker</a></li>
+    <li><a href="#testimonials">Reviews</a></li>
+  </ul>
+  <a class="nav-cta" href="#symptom-checker">Get Started Free</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <div>
+      <span class="hero-badge">AI-Powered Healthcare Platform</span>
+      <h1>Your <em>Smart Health</em> Companion for Better Care</h1>
+      <p>Get personalized doctor recommendations, instant symptom analysis, and evidence-based treatment guidance — all in one trusted platform.</p>
+      <div class="hero-actions">
+        <a href="#symptom-checker" class="btn-primary">Check Your Symptoms</a>
+        <a href="#how-it-works" class="btn-outline">See How It Works</a>
+      </div>
+    </div>
+    <div class="hero-card">
+      <p class="hero-card-title">Live Symptom Assessment</p>
+      <ul class="symptom-list">
+        <li class="symptom-item">
+          <div class="symptom-icon icon-coral">🤒</div>
+          <span>High fever (39°C+)</span>
+          <span class="tag tag-high">Urgent</span>
+        </li>
+        <li class="symptom-item">
+          <div class="symptom-icon icon-amber">🤧</div>
+          <span>Persistent headache</span>
+          <span class="tag tag-med">Moderate</span>
+        </li>
+        <li class="symptom-item">
+          <div class="symptom-icon icon-teal">😮‍💨</div>
+          <span>Mild fatigue</span>
+          <span class="tag tag-low">Monitor</span>
+        </li>
+      </ul>
+      <div class="hero-reco">
+        <p class="hero-reco-label">AI Recommendation</p>
+        <p class="hero-reco-text">Based on your symptoms, consult a <strong style="color:#5DCAA5;">General Physician</strong> within 24 hours. Possible: Viral infection or early flu. Stay hydrated and rest.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stats-inner">
+    <div>
+      <p class="stat-num">2.4M+</p>
+      <p class="stat-label">Patients Served</p>
+    </div>
+    <div>
+      <p class="stat-num">12,000+</p>
+      <p class="stat-label">Verified Doctors</p>
+    </div>
+    <div>
+      <p class="stat-num">98.6%</p>
+      <p class="stat-label">Accuracy Rate</p>
+    </div>
+    <div>
+      <p class="stat-num">50+</p>
+      <p class="stat-label">Medical Specialties</p>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-inner">
+    <span class="section-label">Platform Features</span>
+    <h2 class="section-title">Everything You Need for Smarter Healthcare</h2>
+    <p class="section-sub">From symptom checking to specialist booking — MediGuide brings the full healthcare journey into one intelligent system.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon icon-teal">🩺</div>
+        <h3>Symptom Analysis</h3>
+        <p>Describe how you feel in plain language. Our AI maps your symptoms to potential conditions with clinical accuracy using thousands of medical data points.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon icon-blue">🔍</div>
+        <h3>Doctor Finder</h3>
+        <p>Get matched with verified specialists based on your condition, location, insurance, and availability. Read real patient reviews and book instantly.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon icon-coral">💊</div>
+        <h3>Medicine Guidance</h3>
+        <p>Understand your prescriptions, check drug interactions, and get dosage reminders. Evidence-based information reviewed by licensed pharmacists.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon icon-amber">📋</div>
+        <h3>Health Records</h3>
+        <p>Store and share your medical history securely. Give your doctors instant access to your full health profile for more informed care decisions.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon icon-teal">📊</div>
+        <h3>Wellness Tracking</h3>
+        <p>Monitor vital signs, lab results, and chronic condition metrics over time. Visualize your health trends and get proactive alerts when needed.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon icon-blue">🔒</div>
+        <h3>Privacy First</h3>
+        <p>Your health data is encrypted end-to-end and never sold. HIPAA-compliant infrastructure with full transparency over who accesses your information.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works">
+  <div class="section-inner">
+    <span class="section-label">Process</span>
+    <h2 class="section-title">Get Recommendations in 4 Simple Steps</h2>
+    <p class="section-sub">Our intelligent system makes navigating healthcare fast, clear, and personalized to you.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Describe Symptoms</h3>
+        <p>Enter your symptoms in everyday language or select from our visual body map. No medical jargon needed.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>AI Analysis</h3>
+        <p>Our system cross-references your profile, history, and symptoms against a database of clinical patterns.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Get Recommendations</h3>
+        <p>Receive ranked suggestions: which specialist to see, relevant medicines, and urgency level guidance.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <h3>Book & Track</h3>
+        <p>Book an appointment directly, then track your health journey with follow-up reminders and outcome logging.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RECOMMENDATION TYPES -->
+<section id="recommendations" style="background: white;">
+  <div class="section-inner">
+    <span class="section-label">What We Recommend</span>
+    <h2 class="section-title">Three Pillars of Healthcare Guidance</h2>
+    <p class="section-sub">Comprehensive recommendations that cover every stage of your healthcare journey.</p>
+    <div class="reco-types">
+      <div class="reco-card reco-teal">
+        <div class="reco-card-icon">🏥</div>
+        <h3>Doctor & Specialist Finder</h3>
+        <p>Find the right healthcare provider for your needs — from GPs to specialized surgeons.</p>
+        <ul class="reco-list">
+          <li>Match by condition and specialty</li>
+          <li>Filter by location & insurance</li>
+          <li>View verified reviews & credentials</li>
+          <li>Telemedicine options available</li>
+          <li>Real-time appointment availability</li>
+        </ul>
+      </div>
+      <div class="reco-card reco-blue">
+        <div class="reco-card-icon">🧬</div>
+        <h3>Symptom & Diagnosis Guide</h3>
+        <p>Understand your symptoms with AI-guided analysis backed by clinical evidence.</p>
+        <ul class="reco-list">
+          <li>Multi-symptom pattern recognition</li>
+          <li>Differential diagnosis suggestions</li>
+          <li>Urgency level classification</li>
+          <li>Condition probability scoring</li>
+          <li>Recommended follow-up tests</li>
+        </ul>
+      </div>
+      <div class="reco-card reco-coral">
+        <div class="reco-card-icon">💊</div>
+        <h3>Medicine & Treatment</h3>
+        <p>Navigate medications and treatment options with pharmacist-reviewed information.</p>
+        <ul class="reco-list">
+          <li>Drug interaction checker</li>
+          <li>Dosage & schedule guidance</li>
+          <li>Generic vs. brand comparisons</li>
+          <li>Side effect monitoring</li>
+          <li>Alternative therapy options</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DOCTORS -->
+<section id="doctors">
+  <div class="section-inner">
+    <span class="section-label">Our Specialists</span>
+    <h2 class="section-title">Trusted, Verified Healthcare Professionals</h2>
+    <p class="section-sub">Every doctor on MediGuide is credential-verified, board-certified, and patient-reviewed.</p>
+    <div class="doctors-grid">
+      <div class="doctor-card">
+        <div class="doctor-avatar av-teal">SR</div>
+        <h4>Dr. Sarah Rahman</h4>
+        <p class="doctor-specialty">Cardiologist</p>
+        <p class="doctor-meta">MBBS, MD · 14 yrs exp</p>
+        <div class="doctor-rating">
+          <span class="stars">★★★★★</span>
+          <span class="rating-num">4.9 (312)</span>
+        </div>
+        <a class="doc-btn" href="#symptom-checker">Book Appointment</a>
+      </div>
+      <div class="doctor-card">
+        <div class="doctor-avatar av-blue">AK</div>
+        <h4>Dr. Amir Khan</h4>
+        <p class="doctor-specialty">Neurologist</p>
+        <p class="doctor-meta">MBBS, FCPS · 11 yrs exp</p>
+        <div class="doctor-rating">
+          <span class="stars">★★★★★</span>
+          <span class="rating-num">4.8 (278)</span>
+        </div>
+        <a class="doc-btn" href="#symptom-checker">Book Appointment</a>
+      </div>
+      <div class="doctor-card">
+        <div class="doctor-avatar av-coral">NF</div>
+        <h4>Dr. Nadia Farooq</h4>
+        <p class="doctor-specialty">Dermatologist</p>
+        <p class="doctor-meta">MBBS, DDVL · 9 yrs exp</p>
+        <div class="doctor-rating">
+          <span class="stars">★★★★☆</span>
+          <span class="rating-num">4.7 (194)</span>
+        </div>
+        <a class="doc-btn" href="#symptom-checker">Book Appointment</a>
+      </div>
+      <div class="doctor-card">
+        <div class="doctor-avatar av-amber">ZM</div>
+        <h4>Dr. Zara Malik</h4>
+        <p class="doctor-specialty">General Physician</p>
+        <p class="doctor-meta">MBBS, MRCGP · 7 yrs exp</p>
+        <div class="doctor-rating">
+          <span class="stars">★★★★★</span>
+          <span class="rating-num">4.9 (441)</span>
+        </div>
+        <a class="doc-btn" href="#symptom-checker">Book Appointment</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SYMPTOM CHECKER -->
+<section id="symptom-checker">
+  <div class="section-inner">
+    <div class="checker-layout">
+      <div class="checker-info">
+        <span class="section-label">Symptom Checker</span>
+        <h3>Describe your symptoms and get instant guidance</h3>
+        <p>Our AI analyzes your inputs in seconds and provides clear, evidence-based suggestions — helping you decide whether to monitor at home, visit a clinic, or seek urgent care.</p>
+        <div class="info-pills">
+          <div class="info-pill"><span class="info-pill-dot dot-teal"></span>Available 24/7</div>
+          <div class="info-pill"><span class="info-pill-dot dot-blue"></span>Not a diagnosis</div>
+          <div class="info-pill"><span class="info-pill-dot dot-amber"></span>Clinically reviewed</div>
+        </div>
+        <div class="disclaimer" style="margin-top: 1.5rem;">
+          ⚠ This tool provides guidance only and does not replace professional medical advice. Always consult a qualified healthcare provider.
+        </div>
+      </div>
+      <div class="checker-form">
+        <h3>Quick Symptom Check</h3>
+        <div class="form-group">
+          <label>Your Age</label>
+          <input type="number" placeholder="e.g. 34" min="1" max="120" id="age-input"/>
+        </div>
+        <div class="form-group">
+          <label>Primary Symptom</label>
+          <select id="primary-symptom">
+            <option value="">Select main symptom...</option>
+            <option value="fever">Fever / High Temperature</option>
+            <option value="headache">Headache / Migraine</option>
+            <option value="chest">Chest Pain / Tightness</option>
+            <option value="cough">Persistent Cough</option>
+            <option value="fatigue">Extreme Fatigue</option>
+            <option value="rash">Skin Rash / Irritation</option>
+            <option value="stomach">Stomach Pain / Nausea</option>
+            <option value="breathe">Breathing Difficulty</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Also experiencing: (select all that apply)</label>
+          <div class="symptom-tags">
+            <span class="sym-tag" onclick="toggleTag(this)">Nausea</span>
+            <span class="sym-tag" onclick="toggleTag(this)">Dizziness</span>
+            <span class="sym-tag" onclick="toggleTag(this)">Sore throat</span>
+            <span class="sym-tag" onclick="toggleTag(this)">Body aches</span>
+            <span class="sym-tag" onclick="toggleTag(this)">Chills</span>
+            <span class="sym-tag" onclick="toggleTag(this)">Loss of appetite</span>
+            <span class="sym-tag" onclick="toggleTag(this)">Sweating</span>
+            <span class="sym-tag" onclick="toggleTag(this)">Joint pain</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Duration of Symptoms</label>
+          <select id="duration">
+            <option value="">How long have you had these?</option>
+            <option value="today">Started today</option>
+            <option value="days">1–3 days</option>
+            <option value="week">4–7 days</option>
+            <option value="long">More than a week</option>
+          </select>
+        </div>
+        <button class="submit-btn" onclick="analyzeSymptoms()">Analyze My Symptoms →</button>
+        <div class="result-panel" id="result-panel">
+          <div class="result-card">
+            <span class="urgency-badge" id="urgency-badge">Monitor at Home</span>
+            <h4 id="result-title">Likely: Viral Upper Respiratory Infection</h4>
+            <p id="result-desc">Your combination of symptoms is consistent with a common viral infection. Rest, stay hydrated, and monitor your temperature.</p>
+          </div>
+          <div class="result-card" style="border-left-color: var(--blue-mid);">
+            <h4>Recommended Specialist</h4>
+            <p id="result-doctor">General Physician — Consider booking an appointment if symptoms persist beyond 3 days or worsen.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="section-inner">
+    <span class="section-label">Patient Stories</span>
+    <h2 class="section-title">Trusted by Millions of Patients</h2>
+    <p class="section-sub">Real experiences from people who found better care through MediGuide.</p>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"MediGuide helped me identify that my persistent headaches needed a neurologist, not just over-the-counter painkillers. Booked an appointment in minutes."</p>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background: rgba(93,202,165,0.25); color: #5DCAA5;">FI</div>
+          <div>
+            <p class="author-name">Fatima Iqbal</p>
+            <p class="author-role">Lahore, Pakistan</p>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"The drug interaction checker saved me from taking two medications that could have been dangerous together. Every patient needs this tool."</p>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background: rgba(55,138,221,0.25); color: #85B7EB;">MH</div>
+          <div>
+            <p class="author-name">Mohammed Hassan</p>
+            <p class="author-role">Karachi, Pakistan</p>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"As someone managing diabetes, having all my health records and specialist recommendations in one place has made managing my condition so much easier."</p>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background: rgba(186,117,23,0.25); color: #FAC775;">SR</div>
+          <div>
+            <p class="author-name">Sara Rehman</p>
+            <p class="author-role">Islamabad, Pakistan</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="section-inner" style="text-align: center;">
+    <span class="section-label">Get Started Today</span>
+    <h2 class="section-title">Take Control of Your Health</h2>
+    <p class="section-sub" style="margin: 0 auto 2.5rem;">Join over 2.4 million patients who use MediGuide to make smarter, faster, and more confident healthcare decisions.</p>
+    <div class="cta-actions">
+      <a href="#symptom-checker" class="btn-teal">Check Your Symptoms Now</a>
+      <a href="#doctors" class="btn-ghost">Browse Doctors</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a class="nav-logo" href="#">MediGuide</a>
+      <p>Empowering patients with intelligent healthcare recommendations. Always accurate, always private, always on your side.</p>
+      <div class="disclaimer">
+        MediGuide does not provide medical diagnoses. Always consult a licensed healthcare professional for medical advice.
+      </div>
+    </div>
+    <div class="footer-col">
+      <h5>Platform</h5>
+      <ul>
+        <li><a href="#">Symptom Checker</a></li>
+        <li><a href="#">Find a Doctor</a></li>
+        <li><a href="#">Medicine Guide</a></li>
+        <li><a href="#">Health Records</a></li>
+        <li><a href="#">Wellness Tracker</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Specialties</h5>
+      <ul>
+        <li><a href="#">Cardiology</a></li>
+        <li><a href="#">Neurology</a></li>
+        <li><a href="#">Dermatology</a></li>
+        <li><a href="#">Pediatrics</a></li>
+        <li><a href="#">Orthopedics</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Company</h5>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">For Doctors</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Use</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 MediGuide. All rights reserved.</p>
+    <p>Built for patients. Powered by evidence.</p>
+  </div>
+</footer>
+
+<script>
+  function toggleTag(el) {
+    el.classList.toggle('active');
+  }
+
+  const recommendations = {
+    fever: {
+      title: "Likely: Viral or Bacterial Infection",
+      desc: "Fever combined with your other symptoms suggests an active infection. Monitor temperature, stay hydrated. Seek care if temperature exceeds 39°C.",
+      urgency: "Moderate — See a Doctor",
+      urgClass: "urg-moderate",
+      doctor: "General Physician — Book within 24 hours if fever persists or reaches 39°C+."
+    },
+    headache: {
+      title: "Likely: Tension Headache or Migraine",
+      desc: "Your symptom profile is consistent with tension-type headache or early migraine. Rest in a quiet, dark room. Track frequency and triggers.",
+      urgency: "Monitor at Home",
+      urgClass: "urg-normal",
+      doctor: "Neurologist — Consider consulting if headaches are frequent (3+ per week) or severe."
+    },
+    chest: {
+      title: "Potential: Cardiac or Musculoskeletal Issue",
+      desc: "Chest pain requires prompt evaluation. This could range from acid reflux to a cardiac issue. Do not ignore this symptom.",
+      urgency: "Urgent — Seek Care Now",
+      urgClass: "urg-urgent",
+      doctor: "Cardiologist or Emergency Care — Please seek evaluation immediately, especially if pain radiates to the arm or jaw."
+    },
+    cough: {
+      title: "Likely: Upper Respiratory Infection",
+      desc: "Persistent cough is commonly caused by viral infections, allergies, or environmental irritants. Monitor for blood in sputum or fever.",
+      urgency: "Monitor at Home",
+      urgClass: "urg-normal",
+      doctor: "General Physician — See a doctor if the cough persists more than 2 weeks or produces blood."
+    },
+    breathe: {
+      title: "Potential: Respiratory or Cardiac Issue",
+      desc: "Difficulty breathing can indicate asthma, infection, or cardiac issues. This symptom warrants prompt medical attention.",
+      urgency: "Urgent — Seek Care Now",
+      urgClass: "urg-urgent",
+      doctor: "Pulmonologist or Emergency Care — Please seek immediate evaluation. Do not delay."
+    },
+    rash: {
+      title: "Likely: Allergic Reaction or Skin Condition",
+      desc: "Skin rashes have many causes including allergies, eczema, infections, or drug reactions. Note when it started and any new products used.",
+      urgency: "Monitor at Home",
+      urgClass: "urg-normal",
+      doctor: "Dermatologist — Book within a week, sooner if rash spreads rapidly or is accompanied by fever."
+    },
+    fatigue: {
+      title: "Possible: Nutritional Deficiency or Systemic Condition",
+      desc: "Extreme fatigue may indicate anemia, thyroid issues, or other systemic conditions. Blood tests are recommended.",
+      urgency: "Moderate — See a Doctor",
+      urgClass: "urg-moderate",
+      doctor: "General Physician — Request a complete blood count (CBC) and thyroid panel at your next visit."
+    },
+    stomach: {
+      title: "Likely: Gastrointestinal Issue",
+      desc: "Stomach pain and nausea are commonly caused by gastritis, food intolerance, or viral gastroenteritis. Stay hydrated with clear fluids.",
+      urgency: "Monitor at Home",
+      urgClass: "urg-normal",
+      doctor: "Gastroenterologist — Consult if pain is severe, persistent, or accompanied by blood in stool."
+    }
+  };
+
+  function analyzeSymptoms() {
+    const sym = document.getElementById('primary-symptom').value;
+    const age = document.getElementById('age-input').value;
+    const panel = document.getElementById('result-panel');
+    if (!sym) {
+      document.getElementById('primary-symptom').style.borderColor = 'var(--coral)';
+      return;
+    }
+    const r = recommendations[sym];
+    document.getElementById('urgency-badge').textContent = r.urgency;
+    document.getElementById('urgency-badge').className = 'urgency-badge ' + r.urgClass;
+    document.getElementById('result-title').textContent = r.title;
+    document.getElementById('result-desc').textContent = r.desc + (age ? ` (Age ${age} considered in assessment.)` : '');
+    document.getElementById('result-doctor').textContent = r.doctor;
+    panel.classList.add('show');
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  // Smooth entrance animation
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.feature-card, .step, .reco-card, .doctor-card, .testimonial-card').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(24px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
